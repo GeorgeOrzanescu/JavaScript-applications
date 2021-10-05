@@ -13,19 +13,6 @@ async function fetchData(searchMovie) {
   return response.data.Search;
 }
 
-// specific request based on first search to API based on id
-
-async function fetchData2() {
-  const response = await axios.get("http://www.omdbapi.com/", {
-    params: {
-      apikey: "4ee3ab99",
-      i: "tt0848228",
-    },
-  });
-
-  console.log(response.data);
-}
-
 // DEBOUNCE WRAPPER FUNCTION --> for reusibility
 const debounce = (funct, delay = 1000) => {
   let timeoutId;
@@ -38,4 +25,57 @@ const debounce = (funct, delay = 1000) => {
       funct.apply(null, args);
     }, delay);
   };
+};
+
+// specific request based on first search to API based on id
+const onMovieSelect = async (movie) => {
+  const response = await axios.get("http://www.omdbapi.com/", {
+    params: {
+      apikey: "4ee3ab99",
+      i: movie.imdbID,
+    },
+  });
+  console.log(response.data);
+  document.querySelector("#summary").innerHTML = movieDetail(response.data);
+};
+
+// handle HTML code for movie details (single view)
+
+const movieDetail = (movieData) => {
+  return `
+        <article class="media">
+            <figure class="media-left">
+                <p class="image">
+                    <img src="${movieData.Poster}"/>
+                </p>
+            </figure>
+            <div class="media-content">
+                <div class="content">
+                    <h1>${movieData.Title}</h1>
+                    <h4>${movieData.Genre}</h4>
+                    <p>${movieData.Plot}</p>
+                </div>
+            </div>
+        </article>
+        <article class="notification is-primary">
+            <p class="title">${movieData.Awards}</p>
+            <p class="subtitle">Awards</p>
+        </article>
+        <article class="notification is-primary">
+            <p class="title">${movieData.BoxOffice}</p>
+            <p class="subtitle">BoxOffice</p>
+        </article>
+        <article class="notification is-primary">
+            <p class="title">${movieData.Metascore}</p>
+            <p class="subtitle">Metascore</p>
+        </article>
+        <article class="notification is-primary">
+            <p class="title">${movieData.imdbRating}</p>
+            <p class="subtitle">IMDB Rating</p>
+        </article>
+        <article class="notification is-primary">
+            <p class="title">${movieData.imdbVotes}</p>
+            <p class="subtitle">IMDB Votes</p>
+        </article>
+    `;
 };
