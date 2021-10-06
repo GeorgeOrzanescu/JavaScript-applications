@@ -28,7 +28,7 @@ const debounce = (funct, delay = 1000) => {
 };
 
 // specific request based on first search to API based on id
-const onMovieSelect = async (movie) => {
+const onMovieSelect = async (movie, destination) => {
   const response = await axios.get("http://www.omdbapi.com/", {
     params: {
       apikey: "4ee3ab99",
@@ -36,7 +36,7 @@ const onMovieSelect = async (movie) => {
     },
   });
   console.log(response.data);
-  document.querySelector("#summary").innerHTML = movieDetail(response.data);
+  document.querySelector(destination).innerHTML = movieDetail(response.data);
 };
 
 // handle HTML code for movie details (single view)

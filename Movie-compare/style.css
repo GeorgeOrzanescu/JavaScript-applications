@@ -1,3 +1,33 @@
+.search_holder1 {
+  padding: 10;
+  float: left;
+}
+.search_holder2 {
+  padding: 10;
+  float: right;
+}
+
+#movie_f {
+  float: inherit;
+  width: fit-content;
+  max-width: 30%;
+}
+#movie_s {
+  float: inherit;
+  width: fit-content;
+  max-width: 30%;
+}
+
+figure.image {
+  display: flex;
+  justify-content: center;
+  background-color: black;
+}
+
+figure .image img {
+  width: 128px;
+}
+
 .tutorial {
   width: 600px;
   text-align: center;
