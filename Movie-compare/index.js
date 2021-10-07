@@ -1,4 +1,4 @@
-// SEARCH WIDGET
+// SEARCH WIDGETS
 const root = document.querySelector("#left-autocomplete");
 const root2 = document.querySelector("#right-autocomplete");
 
@@ -24,6 +24,7 @@ const resultsWrapper2 = document
   .querySelector("#right-autocomplete")
   .querySelector(".results");
 
+// first search widget
 const onInput = async (event) => {
   const movies = await fetchData(event.target.value);
   resultsWrapper.innerHTML = "";
@@ -47,6 +48,7 @@ const onInput = async (event) => {
   }
 };
 
+// second search widget
 const onInput2 = async (event) => {
   const movies = await fetchData(event.target.value);
   resultsWrapper2.innerHTML = "";
