@@ -48,3 +48,32 @@ const grid = Array(cellsVertical) // create array for each cell of the grid
   .map(() => Array(cellsHorizontal).fill(true));
 
 console.log(grid);
+// create a random row and column to start the maze creation from
+const startRow = Math.floor(Math.random() * cellsHorizontal);
+const startCol = Math.floor(Math.random() * cellsVertical);
+
+/* Maze creation steps:
+  1 mark this cell as visited
+  2 Assemble randomly-ordered list of neighbors
+  3 for each neighbor ...
+       check to see if neighbor is out of the grid (cell that doesn't exist)
+       If we have visited that neighbor continue to next neighbor
+       draw wall 
+  4 recursive --> next neighbor
+
+*/
+
+const createMaze = (row, col) => {
+  // 1
+  grid[row][col] = false; // mark the starting cell as visited = false
+  // 2
+  const neighbors = shuffleNeighbors([
+    [row - 1, col], // up
+    [row + 1, col], // down
+    [row, col + 1], //right
+    [row, col - 1], //left
+  ]);
+  console.log(neighbors);
+};
+
+createMaze(2, 2);
