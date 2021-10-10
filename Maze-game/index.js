@@ -31,10 +31,10 @@ const walls = [
 ];
 
 // create bodies
-const box = Bodies.rectangle(200, 200, 40, 40);
-const circle = Bodies.circle(400, 400, 20);
+// const box = Bodies.rectangle(200, 200, 40, 40);
+// const circle = Bodies.circle(400, 400, 20);
 
-Composite.add(world, [box, circle]); // add bodies
+// Composite.add(world, [box, circle]); // add bodies
 Composite.add(world, walls); // add walls
 
 Render.run(render);
@@ -47,7 +47,14 @@ const grid = Array(cellsVertical) // create array for each cell of the grid
   .fill(null)
   .map(() => Array(cellsHorizontal).fill(true));
 
-console.log(grid);
+const verticals = Array(cellsVertical) // array for position of vertical walls
+  .fill(null)
+  .map(() => Array(cellsHorizontal - 1).fill(true));
+
+const horizontals = Array(cellsVertical - 1) // array for position of horizontal walls
+  .fill(null)
+  .map(() => Array(cellsHorizontal).fill(true));
+
 // create a random row and column to start the maze creation from
 const startRow = Math.floor(Math.random() * cellsHorizontal);
 const startCol = Math.floor(Math.random() * cellsVertical);
@@ -58,22 +65,98 @@ const startCol = Math.floor(Math.random() * cellsVertical);
   3 for each neighbor ...
        check to see if neighbor is out of the grid (cell that doesn't exist)
        If we have visited that neighbor continue to next neighbor
-       draw wall 
+       Mark the position of vertical and horizontal walls 
   4 recursive --> next neighbor
 
 */
 
 const createMaze = (row, col) => {
+  console.log(row, col);
+  //condition to exit recursivity
+  if (!grid[row][col]) {
+    return;
+  }
+
   // 1
   grid[row][col] = false; // mark the starting cell as visited = false
   // 2
   const neighbors = shuffleNeighbors([
-    [row - 1, col], // up
-    [row + 1, col], // down
-    [row, col + 1], //right
-    [row, col - 1], //left
+    [row - 1, col, "up"], // up
+    [row + 1, col, "down"], // down
+    [row, col + 1, "right"], //right
+    [row, col - 1, "left"], //left
   ]);
-  console.log(neighbors);
+  // 3
+  for (let neighbor of neighbors) {
+    console.log(neighbor);
+    const [nextRow, nextCol, direction] = neighbor;
+    if (
+      nextRow < 0 ||
+      nextCol < 0 ||
+      nextRow >= cellsVertical ||
+      nextCol >= cellsHorizontal
+    ) {
+      continue; // skip's the invalid neighbor
+    }
+    if (!grid[nextRow][nextCol]) {
+      continue; // if the cell is visited already skip
+    }
+    // mark where walls should not be drawn
+    if (direction === "up") {
+      horizontals[row - 1][col] = false;
+    } else if (direction === "down") {
+      horizontals[row][col] = false;
+    }
+
+    if (direction === "right") {
+      verticals[row][col] = false;
+    } else if (direction === "left") {
+      verticals[row][col - 1] = false;
+    }
+    // 4
+    createMaze(nextRow, nextCol);
+  }
 };
 
-createMaze(2, 2);
+createMaze(startRow, startCol);
+
+// horizontal walls creation
+const unit = 200;
+
+for (let row of horizontals) {
+  console.log(row);
+  for (let position in row) {
+    console.log(row[position]);
+    if (row[position]) {
+      const wall = Bodies.rectangle(
+        position * unit + unit / 2,
+        horizontals.indexOf(row) * unit + unit,
+        unit,
+        5,
+        {
+          isStatic: true,
+        }
+      );
+      Composite.add(world, wall);
+    }
+  }
+}
+
+// vertical walls creation
+
+for (let row of verticals) {
+  for (let position in row) {
+    if (row[position]) {
+      const wall = Bodies.rectangle(
+        position * unit + unit,
+        verticals.indexOf(row) * unit + unit / 2,
+        5,
+        unit,
+        {
+          isStatic: true,
+        }
+      );
+      Composite.add(world, wall);
+    }
+  }
+}
