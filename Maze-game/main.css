@@ -1,0 +1,15 @@
+.hidden {
+  visibility: hidden;
+}
+
+.winner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: x-large;
+  color: greenyellow;
+  position: absolute;
+  z-index: 1;
+  height: 100vh;
+  width: 100vw;
+}

@@ -1,12 +1,13 @@
 // Destructure the modules we need from the Matter.js library
 
-const { Engine, Composite, Render, Bodies, Runner } = Matter;
+const { Engine, Composite, Render, Bodies, Runner, Body, Events } = Matter;
 
 /* Runner --> module is an optional utility which provides a game loop,
  that handles continuously updating a Matter.Engine for you within a browser
 */
 
 const engine = Engine.create();
+engine.world.gravity.y = 0;
 const world = engine.world; // world is created by the engine
 
 const width = 800;
@@ -71,7 +72,6 @@ const startCol = Math.floor(Math.random() * cellsVertical);
 */
 
 const createMaze = (row, col) => {
-  console.log(row, col);
   //condition to exit recursivity
   if (!grid[row][col]) {
     return;
@@ -88,7 +88,6 @@ const createMaze = (row, col) => {
   ]);
   // 3
   for (let neighbor of neighbors) {
-    console.log(neighbor);
     const [nextRow, nextCol, direction] = neighbor;
     if (
       nextRow < 0 ||
@@ -124,9 +123,7 @@ createMaze(startRow, startCol);
 const unit = 200;
 
 for (let row of horizontals) {
-  console.log(row);
   for (let position in row) {
-    console.log(row[position]);
     if (row[position]) {
       const wall = Bodies.rectangle(
         position * unit + unit / 2,
@@ -134,6 +131,7 @@ for (let row of horizontals) {
         unit,
         5,
         {
+          label: "wall",
           isStatic: true,
         }
       );
@@ -153,6 +151,7 @@ for (let row of verticals) {
         5,
         unit,
         {
+          label: "wall",
           isStatic: true,
         }
       );
@@ -160,3 +159,76 @@ for (let row of verticals) {
     }
   }
 }
+
+// create finish point
+const finish = Bodies.rectangle(
+  width - unit / 2,
+  height - unit / 2,
+  unit * 0.6,
+  unit * 0.6,
+  {
+    label: "finish",
+    isStatic: true,
+    render: {
+      fillStyle: "green",
+    },
+  }
+);
+
+// create player avatar
+const player = Bodies.circle(unit / 2, unit / 2, unit * 0.3, {
+  label: "player",
+  render: {
+    fillStyle: "yellow",
+  },
+});
+console.log(player.velocity);
+
+Composite.add(world, [finish, player]);
+
+// CONTROL OF THE AVATAR with "wasd" keys
+
+document.addEventListener("keydown", (event) => {
+  const { x, y } = player.velocity; // destructure velocity of the avatar
+
+  if (event.code === "KeyW") {
+    // move UP
+    Body.setVelocity(player, { x, y: y - 5 });
+  }
+  if (event.code === "KeyD") {
+    // move RIGHTww
+    Body.setVelocity(player, {
+      x: x + 5,
+      y: y + 5,
+    });
+  }
+  if (event.code === "KeyS") {
+    // move DOWN
+    Body.setVelocity(player, { x, y: y + 5 });
+  }
+  if (event.code === "KeyA") {
+    // move LEFT
+    Body.setVelocity(player, { x: x - 5, y });
+  }
+});
+
+// DETECT WIN CONDITION --> collision between player and finish
+
+const labels = ["player", "finish"];
+Events.on(engine, "collisionStart", (event) => {
+  event.pairs.forEach((collision) => {
+    if (
+      labels.includes(collision.bodyA.label) &&
+      labels.includes(collision.bodyB.label)
+    ) {
+      world.gravity.y = 1; // turn gravity back on
+      world.bodies.forEach((body) => {
+        // remove static property of walls
+        if (body.label == "wall") {
+          Body.setStatic(body, false);
+          document.querySelector(".winner").classList.remove("hidden");
+        }
+      });
+    }
+  });
+});
