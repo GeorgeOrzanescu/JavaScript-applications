@@ -10,8 +10,12 @@ const engine = Engine.create();
 engine.world.gravity.y = 0;
 const world = engine.world; // world is created by the engine
 
-const width = 800;
-const height = 800;
+// number of cells in the grid (square so its equal )
+const cellsHorizontal = 3;
+const cellsVertical = 3;
+
+const width = window.innerWidth;
+const height = window.innerHeight;
 
 const render = Render.create({
   element: document.body, // where to create the render
@@ -25,10 +29,10 @@ const render = Render.create({
 
 //create border around the world
 const walls = [
-  Bodies.rectangle(width / 2, 0, width, 10, { isStatic: true }), // upper
-  Bodies.rectangle(width / 2, height, width, 10, { isStatic: true }), // lower
-  Bodies.rectangle(width, height / 2, 10, height, { isStatic: true }), // right
-  Bodies.rectangle(0, height / 2, 10, height, { isStatic: true }), // left
+  Bodies.rectangle(width / 2, 0, width, 5, { isStatic: true }), // upper
+  Bodies.rectangle(width / 2, height, width, 5, { isStatic: true }), // lower
+  Bodies.rectangle(width, height / 2, 5, height, { isStatic: true }), // right
+  Bodies.rectangle(0, height / 2, 5, height, { isStatic: true }), // left
 ];
 
 // create bodies
@@ -41,8 +45,8 @@ Composite.add(world, walls); // add walls
 Render.run(render);
 Runner.run(Runner.create(), engine);
 
-const cellsVertical = 4;
-const cellsHorizontal = 4;
+const unitLengthX = width / cellsHorizontal;
+const unitLengthY = height / cellsVertical;
 
 const grid = Array(cellsVertical) // create array for each cell of the grid
   .fill(null)
@@ -57,8 +61,8 @@ const horizontals = Array(cellsVertical - 1) // array for position of horizontal
   .map(() => Array(cellsHorizontal).fill(true));
 
 // create a random row and column to start the maze creation from
-const startRow = Math.floor(Math.random() * cellsHorizontal);
-const startCol = Math.floor(Math.random() * cellsVertical);
+const startRow = Math.floor(Math.random() * cellsVertical);
+const startCol = Math.floor(Math.random() * cellsHorizontal);
 
 /* Maze creation steps:
   1 mark this cell as visited
@@ -120,15 +124,13 @@ const createMaze = (row, col) => {
 createMaze(startRow, startCol);
 
 // horizontal walls creation
-const unit = 200;
-
 for (let row of horizontals) {
   for (let position in row) {
     if (row[position]) {
       const wall = Bodies.rectangle(
-        position * unit + unit / 2,
-        horizontals.indexOf(row) * unit + unit,
-        unit,
+        position * unitLengthX + unitLengthX / 2,
+        horizontals.indexOf(row) * unitLengthY + unitLengthY,
+        unitLengthX,
         5,
         {
           label: "wall",
@@ -146,10 +148,10 @@ for (let row of verticals) {
   for (let position in row) {
     if (row[position]) {
       const wall = Bodies.rectangle(
-        position * unit + unit,
-        verticals.indexOf(row) * unit + unit / 2,
+        position * unitLengthX + unitLengthX,
+        verticals.indexOf(row) * unitLengthY + unitLengthY / 2,
         5,
-        unit,
+        unitLengthY,
         {
           label: "wall",
           isStatic: true,
@@ -162,10 +164,10 @@ for (let row of verticals) {
 
 // create finish point
 const finish = Bodies.rectangle(
-  width - unit / 2,
-  height - unit / 2,
-  unit * 0.6,
-  unit * 0.6,
+  width - unitLengthX / 2,
+  height - unitLengthY / 2,
+  unitLengthX * 0.6,
+  unitLengthY * 0.6,
   {
     label: "finish",
     isStatic: true,
@@ -176,12 +178,17 @@ const finish = Bodies.rectangle(
 );
 
 // create player avatar
-const player = Bodies.circle(unit / 2, unit / 2, unit * 0.3, {
-  label: "player",
-  render: {
-    fillStyle: "yellow",
-  },
-});
+const player = Bodies.circle(
+  unitLengthX / 2,
+  unitLengthY / 2,
+  Math.min(unitLengthY, unitLengthX) * 0.3,
+  {
+    label: "player",
+    render: {
+      fillStyle: "yellow",
+    },
+  }
+);
 console.log(player.velocity);
 
 Composite.add(world, [finish, player]);
@@ -227,8 +234,19 @@ Events.on(engine, "collisionStart", (event) => {
         if (body.label == "wall") {
           Body.setStatic(body, false);
           document.querySelector(".winner").classList.remove("hidden");
+          document.querySelector(".replay").classList.remove("hidden");
         }
       });
     }
   });
+});
+
+const yesButton = document.querySelector(".yButton");
+yesButton.addEventListener("click", (event) => {
+  document.querySelector(".winner").classList.add("hidden");
+  document.querySelector(".replay").classList.add("hidden");
+
+  event.preventDefault();
+  Composite.clear(world);
+  Engine.clear(engine);
 });
