@@ -12,11 +12,18 @@
   z-index: 1;
   height: 100vh;
   width: 100vw;
+  margin-top: 50px;
 }
 
 .replay {
+  color: greenyellow;
   display: flex;
   justify-content: center;
+  align-items: center;
+  position: absolute;
+  height: 100vh;
+  width: 100vw;
+  z-index: 2;
 }
 
 .space {

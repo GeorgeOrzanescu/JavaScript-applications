@@ -48,21 +48,30 @@ Runner.run(Runner.create(), engine);
 const unitLengthX = width / cellsHorizontal;
 const unitLengthY = height / cellsVertical;
 
-const grid = Array(cellsVertical) // create array for each cell of the grid
+let grid = Array(cellsVertical) // create array for each cell of the grid
   .fill(null)
   .map(() => Array(cellsHorizontal).fill(true));
 
-const verticals = Array(cellsVertical) // array for position of vertical walls
+let verticals = Array(cellsVertical) // array for position of vertical walls
   .fill(null)
   .map(() => Array(cellsHorizontal - 1).fill(true));
 
-const horizontals = Array(cellsVertical - 1) // array for position of horizontal walls
+let horizontals = Array(cellsVertical - 1) // array for position of horizontal walls
   .fill(null)
   .map(() => Array(cellsHorizontal).fill(true));
 
+// helper function to clear the arrays after user click's play again
+const ClearArrays = () => {
+  grid.forEach((row) => row.fill(true));
+
+  verticals.forEach((row) => row.fill(true));
+
+  horizontals.forEach((row) => row.fill(true));
+};
+
 // create a random row and column to start the maze creation from
-const startRow = Math.floor(Math.random() * cellsVertical);
-const startCol = Math.floor(Math.random() * cellsHorizontal);
+// let startRow = Math.floor(Math.random() * cellsVertical);
+// let startCol = Math.floor(Math.random() * cellsHorizontal);
 
 /* Maze creation steps:
   1 mark this cell as visited
@@ -75,20 +84,21 @@ const startCol = Math.floor(Math.random() * cellsHorizontal);
 
 */
 
-const createMaze = (row, col) => {
+const createMaze = (startRow, startCol) => {
   //condition to exit recursivity
-  if (!grid[row][col]) {
+  console.log("inside create");
+  if (!grid[startRow][startCol]) {
     return;
   }
 
   // 1
-  grid[row][col] = false; // mark the starting cell as visited = false
+  grid[startRow][startCol] = false; // mark the starting cell as visited = false
   // 2
   const neighbors = shuffleNeighbors([
-    [row - 1, col, "up"], // up
-    [row + 1, col, "down"], // down
-    [row, col + 1, "right"], //right
-    [row, col - 1, "left"], //left
+    [startRow - 1, startCol, "up"], // up
+    [startRow + 1, startCol, "down"], // down
+    [startRow, startCol + 1, "right"], //right
+    [startRow, startCol - 1, "left"], //left
   ]);
   // 3
   for (let neighbor of neighbors) {
@@ -106,22 +116,26 @@ const createMaze = (row, col) => {
     }
     // mark where walls should not be drawn
     if (direction === "up") {
-      horizontals[row - 1][col] = false;
+      horizontals[startRow - 1][startCol] = false;
     } else if (direction === "down") {
-      horizontals[row][col] = false;
+      horizontals[startRow][startCol] = false;
     }
 
     if (direction === "right") {
-      verticals[row][col] = false;
+      verticals[startRow][startCol] = false;
     } else if (direction === "left") {
-      verticals[row][col - 1] = false;
+      verticals[startRow][startCol - 1] = false;
     }
+
     // 4
     createMaze(nextRow, nextCol);
   }
 };
 
-createMaze(startRow, startCol);
+createMaze(
+  Math.floor(Math.random() * cellsVertical),
+  Math.floor(Math.random() * cellsHorizontal)
+);
 
 // horizontal walls creation
 for (let row of horizontals) {
@@ -189,8 +203,6 @@ const player = Bodies.circle(
     },
   }
 );
-console.log(player.velocity);
-
 Composite.add(world, [finish, player]);
 
 // CONTROL OF THE AVATAR with "wasd" keys
@@ -241,6 +253,7 @@ Events.on(engine, "collisionStart", (event) => {
   });
 });
 
+// button's for replay
 const yesButton = document.querySelector(".yButton");
 yesButton.addEventListener("click", (event) => {
   document.querySelector(".winner").classList.add("hidden");
@@ -248,5 +261,15 @@ yesButton.addEventListener("click", (event) => {
 
   event.preventDefault();
   Composite.clear(world);
-  Engine.clear(engine);
+  // Engine.clear(engine);
+  BuildWorld();
+  ClearArrays();
+  Replay();
+  CreatePlayerFinish();
+});
+
+const noButton = document.querySelector(".nButton");
+noButton.addEventListener("click", (event) => {
+  document.querySelector(".winner").classList.add("hidden");
+  document.querySelector(".replay").classList.add("hidden");
 });
