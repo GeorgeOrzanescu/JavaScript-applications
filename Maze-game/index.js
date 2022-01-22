@@ -11,8 +11,8 @@ engine.world.gravity.y = 0;
 const world = engine.world; // world is created by the engine
 
 // number of cells in the grid (square so its equal )
-const cellsHorizontal = 3;
-const cellsVertical = 3;
+const cellsHorizontal = 6;
+const cellsVertical = 6;
 
 const width = window.innerWidth;
 const height = window.innerHeight;
